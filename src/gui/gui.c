@@ -3237,7 +3237,7 @@ static void GUI_StrategicMap_ReadHouseRegions(uint8 houseID, uint16 campaignID)
 
 static void GUI_StrategicMap_DrawRegion(uint8 houseId, uint16 region, bool progressive)
 {
-	char key[4];
+	char key[6];
 	char buffer[81];
 	int16 x;
 	int16 y;
@@ -3245,7 +3245,7 @@ static void GUI_StrategicMap_DrawRegion(uint8 houseId, uint16 region, bool progr
 
 	GUI_Palette_CreateRemap(houseId);
 
-	sprintf(key, "%hu", region);
+	snprintf(key, sizeof(key), "%hu", region);
 
 	Ini_GetString("PIECES", key, NULL, buffer, sizeof(buffer), g_fileRegionINI);
 	sscanf(buffer, "%hd,%hd", &x, &y);
@@ -3280,7 +3280,7 @@ static void GUI_StrategicMap_PrepareRegions(uint16 campaignID)
 static void GUI_StrategicMap_ShowProgression(uint16 campaignID)
 {
 	char key[10];
-	char category[10];
+	char category[12];
 	char buf[100];
 	uint16 i;
 
