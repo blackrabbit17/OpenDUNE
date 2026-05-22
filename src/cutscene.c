@@ -55,6 +55,16 @@ static uint8                s_palettePartChange[18];   /*!< Amount of change of 
 
 bool g_canSkipIntro = false; /*!< When true, you can skip the intro by pressing a key or clicking. */
 
+/* Returns true when the user wants to skip the current cutscene.
+ * ESC always skips. Any other key only skips if g_canSkipIntro is set. */
+static bool Cutscene_SkipRequested(void)
+{
+	uint16 key = Input_Keyboard_NextKey();
+	if (key == 0) return false;
+	if (key == 0x1B) return true;	/* ESCAPE */
+	return g_canSkipIntro;
+}
+
 static void GameLoop_PrepareAnimation(const HouseAnimation_Subtitle *subtitle, uint16 feedback_base_index, const HouseAnimation_SoundEffect *soundEffect)
 {
 	uint8 i;
@@ -438,7 +448,7 @@ static void GameLoop_PlayAnimation(const HouseAnimation_Animation *animation)
 				frame--;
 			}
 
-			if (Input_Keyboard_NextKey() != 0 && g_canSkipIntro) {
+			if (Cutscene_SkipRequested()) {
 				WSA_Unload(wsa);
 				return;
 			}
@@ -973,11 +983,11 @@ static void Gameloop_Logos(void)
 	
 	WSA_Unload(wsa);
 
-	if (Input_Keyboard_NextKey() != 0 && g_canSkipIntro) goto logos_exit;
+	if (Cutscene_SkipRequested()) goto logos_exit;
 	Voice_LoadVoices(0xFFFF);
 
 	for (; g_timerTimeout != 0; sleepIdle()) {
-		if (Input_Keyboard_NextKey() != 0 && g_canSkipIntro) goto logos_exit;
+		if (Cutscene_SkipRequested()) goto logos_exit;
 	}
 
 	GUI_SetPaletteAnimated(g_palette2, 60);
@@ -996,7 +1006,7 @@ static void Gameloop_Logos(void)
 	GUI_SetPaletteAnimated(g_palette_998A, 30);
 
 	for (g_timerTimeout = 60; g_timerTimeout != 0; sleepIdle()) {
-		if (Input_Keyboard_NextKey() != 0 && g_canSkipIntro) goto logos_exit;
+		if (Cutscene_SkipRequested()) goto logos_exit;
 	}
 
 	GUI_SetPaletteAnimated(g_palette2, 30);
@@ -1010,7 +1020,7 @@ static void Gameloop_Logos(void)
 	GUI_SetPaletteAnimated(g_palette_998A, 30);
 
 	for (g_timerTimeout = 180; g_timerTimeout != 0; sleepIdle()) {
-		if (Input_Keyboard_NextKey() != 0 && g_canSkipIntro) goto logos_exit;
+		if (Cutscene_SkipRequested()) goto logos_exit;
 	}
 
 logos_exit:
@@ -1030,7 +1040,7 @@ void GameLoop_GameIntroAnimation(void)
 
 	Gameloop_Logos();
 
-	if (Input_Keyboard_NextKey() == 0 || !g_canSkipIntro) {
+	if (!Cutscene_SkipRequested()) {
 		const HouseAnimation_Animation   *animation   = g_table_houseAnimation_animation[HOUSEANIMATION_INTRO];
 		const HouseAnimation_Subtitle    *subtitle    = g_table_houseAnimation_subtitle[HOUSEANIMATION_INTRO];
 		const HouseAnimation_SoundEffect *soundEffect = g_table_houseAnimation_soundEffect[HOUSEANIMATION_INTRO];
